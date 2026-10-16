@@ -146,8 +146,8 @@ public class SettingsScreen extends Screen {
 						v -> config.dungeonExplorerLevel = (int) v, autoOrLevel()));
 				addRenderableWidget(toggle(col2, y + 2 * ROW, "Positional msgs", () -> config.positionalMessagesEnabled,
 						() -> config.positionalMessagesEnabled = !config.positionalMessagesEnabled));
-				addRenderableWidget(toggle(col2, y + 3 * ROW, "Open chat at spot", () -> config.positionalMessagesOpenChat,
-						() -> config.positionalMessagesOpenChat = !config.positionalMessagesOpenChat));
+				addRenderableWidget(toggle(col2, y + 3 * ROW, "Auto-send msgs", () -> config.positionalMessagesAutoSend,
+						() -> config.positionalMessagesAutoSend = !config.positionalMessagesAutoSend));
 			}
 			default -> {
 			}
@@ -182,7 +182,7 @@ public class SettingsScreen extends Screen {
 					"§7movement don't change; only you see it.");
 			case ANIMATIONS -> List.of("§7First-person item position, size and swing.", "§726.3: swing speed can only be faster.");
 			case DUNGEONS -> List.of("§7M7 calculator: Auto reads Graduate/Explorer from shards.",
-					"§7Positional messages: /posmsg add <name> <radius> <msg>.", "§7You always press Enter to send; nothing auto-sends.");
+					"§7Positional messages: /posmsg add <name> <radius> <msg>.", "§7Auto-send off: click the chat line to send instead.");
 			case GARDEN, MINING, FISHING -> List.of("§7No " + category.label.toLowerCase(Locale.ROOT) + " tweaks yet.");
 		};
 	}

@@ -41,6 +41,8 @@ public final class PvConfig {
 
 	/** Positional party messages, see /posmsg. */
 	public boolean positionalMessagesEnabled = true;
+	/** Send the party message by itself when you reach a spot. Off: show a click-to-send line instead. */
+	public boolean positionalMessagesAutoSend = true;
 	/** Also open the chat box with the message typed in when you reach a spot (you still press Enter). */
 	public boolean positionalMessagesOpenChat = false;
 	public java.util.List<PositionalMessage> positionalMessages = new java.util.ArrayList<>();

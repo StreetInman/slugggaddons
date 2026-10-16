@@ -5,7 +5,7 @@ A client-side Fabric mod for Hypixel SkyBlock (formerly *SkyBlock Profile Viewer
 browse every item and recipe with `/sbitems`, and tweak how things look from `/slugggaddons`.
 Builds are available for Minecraft **26.1.2, 26.2 and 26.3**.
 
-> **Status: early development (v0.4.0).** It works with your own Hypixel developer key. A
+> **Status: early development (v0.4.1).** It works with your own Hypixel developer key. A
 > public release with no key setup needed is planned (see [Roadmap](#roadmap)).
 
 ## Features
@@ -76,8 +76,12 @@ Everything there is client-side and only changes what you see:
 ### Positional messages (`/posmsg`)
 
 A replacement for Odin's old positional messages. Save a spot with a radius and a party message;
-when you walk into it, a clickable line appears in chat, and clicking it puts `/pc <message>` in your
-chat box for you to send with Enter. The mod never sends chat by itself.
+when you walk into it, the mod sends `/pc <message>` for you, once per visit and never more than one
+message a second. Turn **Auto-send** off in the Dungeons settings tab to get a clickable chat line
+instead, which puts the message in your chat box for you to send with Enter.
+
+> Sending chat automatically is something many SkyBlock mods do, but Hypixel's rules on it are not
+> clear-cut, so use it at your own risk.
 
 | Command | What it does |
 |---|---|
@@ -89,8 +93,7 @@ chat box for you to send with Enter. The mod never sends chat by itself.
 | `/posmsg toggle` | Turns the feature on or off |
 
 Messages can include `{x}`, `{y}`, `{z}` (your block position) and `{name}`. `/pm` works as a
-shorter alias. The Dungeons settings tab can also open the chat box automatically when you reach a
-spot (you still press Enter).
+shorter alias. `/posmsg send <name>` sends one straight away.
 
 ### Networth
 
@@ -122,7 +125,7 @@ As with any mod, Hypixel says all mods are used at your own risk.
    [Fabric API](https://modrinth.com/mod/fabric-api) mod for your Minecraft version.
 2. Download the jar for your Minecraft version from
    [Releases](https://github.com/StreetInman/skyblock-pv/releases) (for example
-   `slugggaddons-0.4.0+26.1.2.jar`) and put it in your `mods` folder. Remove any older
+   `slugggaddons-0.4.1+26.1.2.jar`) and put it in your `mods` folder. Remove any older
    `skyblock-pv` jar.
 3. Start the game once. The mod creates `config/slugggaddons.json` (copying your old
    `skyblock-pv.json` settings if you had them).

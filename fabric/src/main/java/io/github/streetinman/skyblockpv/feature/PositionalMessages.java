@@ -29,9 +29,8 @@ import io.github.streetinman.skyblockpv.config.PvConfig;
 
 /**
  * Positional messages (like Odin's old feature): save a spot with a radius and a party message.
- * Walking into the spot puts a clickable line in chat; clicking it fills the chat box with
- * {@code /pc <message>} and you press Enter. Nothing is ever sent for you, so it stays within
- * Hypixel's rules on automated chat.
+ * Walking into the spot sends {@code /pc <message>} straight away (once per visit, rate limited).
+ * With auto-send turned off it puts a clickable line in chat instead, and you press Enter.
  *
  * <p>{@code /posmsg add <name> <radius> <message>} saves where you stand;
  * {@code /posmsg addat <name> <x> <y> <z> <radius> <message>} saves exact coordinates;
@@ -40,6 +39,9 @@ import io.github.streetinman.skyblockpv.config.PvConfig;
  */
 public final class PositionalMessages {
 	private static final Set<String> inside = new HashSet<>();
+	/** Hypixel kicks for chat spam, so never send faster than this. */
+	private static final long MIN_GAP_MS = 1_000;
+	private static long lastSent;
 
 	private PositionalMessages() {
 	}
@@ -142,7 +144,8 @@ public final class PositionalMessages {
 	private static int send(FabricClientCommandSource source, String name) {
 		for (PvConfig.PositionalMessage m : messages()) {
 			if (m.name.equalsIgnoreCase(name)) {
-				openChat("/pc " + fill(m.message));
+				if (SkyblockPvClient.config().positionalMessagesAutoSend) sendToParty(fill(m.message));
+				else openChat("/pc " + fill(m.message));
 				return 1;
 			}
 		}
@@ -163,6 +166,10 @@ public final class PositionalMessages {
 			boolean in = dx * dx + dy * dy + dz * dz <= m.radius * m.radius;
 			if (in && inside.add(m.name)) {
 				String text = fill(m.message);
+				if (SkyblockPvClient.config().positionalMessagesAutoSend) {
+					sendToParty(text);
+					continue;
+				}
 				player.sendSystemMessage(prefix().append(Component.literal(m.name + ": ").withStyle(ChatFormatting.YELLOW))
 						.append(Component.literal(text).withStyle(ChatFormatting.WHITE))
 						.append(Component.literal(" [Click to send to party]").withStyle(sendStyle(text))));
@@ -171,6 +178,15 @@ public final class PositionalMessages {
 				inside.remove(m.name);
 			}
 		}
+	}
+
+	/** Sends {@code /pc <text>}, skipping it if the last message went out under a second ago. */
+	private static void sendToParty(String text) {
+		Minecraft mc = Minecraft.getInstance();
+		long now = System.currentTimeMillis();
+		if (mc.getConnection() == null || now - lastSent < MIN_GAP_MS) return;
+		lastSent = now;
+		mc.getConnection().sendCommand("pc " + text);
 	}
 
 	private static Style sendStyle(String text) {
