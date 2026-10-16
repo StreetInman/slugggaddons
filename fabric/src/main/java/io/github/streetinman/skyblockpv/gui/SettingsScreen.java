@@ -59,7 +59,7 @@ public class SettingsScreen extends Screen {
 	}
 
 	public SettingsScreen(PvConfig config, Runnable save) {
-		super(Component.literal("SkyBlock PV Settings"));
+		super(Component.literal("SlugggAddons Settings"));
 		this.config = config;
 		this.save = save;
 	}
@@ -95,7 +95,7 @@ public class SettingsScreen extends Screen {
 			}
 			case GUI -> {
 				PvConfig.Gui gui = config.gui;
-				addRenderableWidget(toggle(col1, y, "Summary sidebar in /pv", () -> gui.showPlayerModel, () -> gui.showPlayerModel = !gui.showPlayerModel));
+				addRenderableWidget(toggle(col1, y, "Model + summary in /pv", () -> gui.showSidebar, () -> gui.showSidebar = !gui.showSidebar));
 				List<String> tabs = PvScreen.tabLabels();
 				addRenderableWidget(Button.builder(Component.literal("/pv opens on: " + gui.defaultTab), b -> {
 					int i = tabs.indexOf(gui.defaultTab);
@@ -105,9 +105,15 @@ public class SettingsScreen extends Screen {
 			}
 			case PLAYER -> {
 				PvConfig.PlayerModel model = config.playerModel;
-				addRenderableWidget(new Slider(col1, y, "Player size", 0.25, 2.0, 0.05, () -> model.scale, v -> model.scale = v, times()));
+				addRenderableWidget(new Slider(col1, y, "Width (X)", -3.0, 3.0, 0.05, () -> model.scaleX, v -> model.scaleX = v, times()));
+				addRenderableWidget(new Slider(col1, y + ROW, "Height (Y)", -3.0, 3.0, 0.05, () -> model.scaleY, v -> model.scaleY = v, times()));
+				addRenderableWidget(new Slider(col1, y + 2 * ROW, "Depth (Z)", -3.0, 3.0, 0.05, () -> model.scaleZ, v -> model.scaleZ = v, times()));
 				addRenderableWidget(toggle(col2, y, "Other players too", () -> model.includeOtherPlayers,
 						() -> model.includeOtherPlayers = !model.includeOtherPlayers));
+				addRenderableWidget(Button.builder(Component.literal("Reset size"), b -> {
+					model.reset();
+					rebuildWidgets();
+				}).bounds(col2, y + ROW, COLUMN, 20).build());
 			}
 			case ANIMATIONS -> {
 				PvConfig.ItemAnimations anim = config.itemAnimations;
@@ -138,6 +144,10 @@ public class SettingsScreen extends Screen {
 						v -> config.dungeonGraduateLevel = (int) v, autoOrLevel()));
 				addRenderableWidget(new Slider(col2, y + ROW, "Explorer", -1, 10, 1, () -> config.dungeonExplorerLevel,
 						v -> config.dungeonExplorerLevel = (int) v, autoOrLevel()));
+				addRenderableWidget(toggle(col2, y + 2 * ROW, "Positional msgs", () -> config.positionalMessagesEnabled,
+						() -> config.positionalMessagesEnabled = !config.positionalMessagesEnabled));
+				addRenderableWidget(toggle(col2, y + 3 * ROW, "Open chat at spot", () -> config.positionalMessagesOpenChat,
+						() -> config.positionalMessagesOpenChat = !config.positionalMessagesOpenChat));
 			}
 			default -> {
 			}
@@ -153,7 +163,7 @@ public class SettingsScreen extends Screen {
 		g.fill(left, top, left + PANEL_WIDTH, top + PANEL_HEIGHT, 0xE0101018);
 		g.fill(left, top, left + PANEL_WIDTH, top + 1, 0xFF6C6CFF);
 		super.extractRenderState(g, mouseX, mouseY, delta);
-		g.centeredText(font, "§6§lSkyBlock PV Settings", width / 2, top - 36, WHITE);
+		g.centeredText(font, "§6§lSlugggAddons", width / 2, top - 36, WHITE);
 		g.text(font, "§e" + category.label, col1, top + 8, WHITE, true);
 		int y = top + PANEL_HEIGHT - 50;
 		for (String line : notes()) {
@@ -165,13 +175,14 @@ public class SettingsScreen extends Screen {
 	/** Short help under each category's options. */
 	private List<String> notes() {
 		return switch (category) {
-			case GENERAL -> List.of("§7/pv <player> (also /spv, /sbpv) · /sbitems for items",
+			case GENERAL -> List.of("§7/pv <player> (/spv, /sbpv) · /sbitems · /posmsg",
 					"§7Every setting is client-side and changes only", "§7what you see. Nothing is sent to the server.");
 			case GUI -> List.of("§7How the /pv window looks.");
-			case PLAYER -> List.of("§7Scales only the drawn model.", "§7Your hitbox and movement don't change.");
+			case PLAYER -> List.of("§7Stretch the drawn model on each axis. Negative", "§7height turns it upside down. Your hitbox and",
+					"§7movement don't change; only you see it.");
 			case ANIMATIONS -> List.of("§7First-person item position, size and swing.", "§726.3: swing speed can only be faster.");
-			case DUNGEONS -> List.of("§7M7 calculator. Graduate/Explorer: Auto reads the", "§7profile's shards; set a level if it's wrong.",
-					"§7Team share: XP classes you didn't play get.");
+			case DUNGEONS -> List.of("§7M7 calculator: Auto reads Graduate/Explorer from shards.",
+					"§7Positional messages: /posmsg add <name> <radius> <msg>.", "§7You always press Enter to send; nothing auto-sends.");
 			case GARDEN, MINING, FISHING -> List.of("§7No " + category.label.toLowerCase(Locale.ROOT) + " tweaks yet.");
 		};
 	}

@@ -61,7 +61,7 @@ class NetworthCalculatorTest {
 				new DungeonData(0, Map.of(), null, 0, Map.of(), Map.of(), Map.of(), Map.of(), Map.of(), Map.of()), Map.of(), Map.of(),
 				List.of(new Pet("ENDER_DRAGON", "LEGENDARY", 0, true, "PET_ITEM_TIER_BOOST", null)),
 				Map.of("WITHER", 10L), io.github.streetinman.skyblockpv.core.model.AccessoryPower.NONE,
-				io.github.streetinman.skyblockpv.core.model.ProfileExtras.NONE);
+				io.github.streetinman.skyblockpv.core.model.ProfileExtras.NONE, Map.of());
 
 		Networth nw = NetworthCalculator.calculate(m, 5_000.0, PRICES);
 

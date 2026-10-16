@@ -30,7 +30,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: jar-${{ matrix.mc }}
-          path: fabric/build/libs/skyblock-pv-*[0-9].jar
+          path: fabric/build/libs/slugggaddons-*[0-9].jar
       - name: Publish to Modrinth
         if: ${{ env.MODRINTH_TOKEN != '' }}
         run: ./gradlew :fabric:publishMods -Pmc=${{ matrix.mc }}

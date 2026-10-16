@@ -132,6 +132,27 @@ class ProfileParserTest {
 		assertTrue(ProfileParser.parseProfiles(response(null, true), UUID).isEmpty());
 	}
 
+	@Test
+	void findsLoadoutItemListsAnywhereUnderLoadout() {
+		JsonObject member = new JsonObject();
+		JsonObject loadout = new JsonObject();
+		JsonArray slots = new JsonArray();
+		JsonObject first = new JsonObject();
+		first.add("armor", data(Arrays.asList(TestNbt.item(1, "LOADOUT_HELM", "§6Helm"))));
+		first.addProperty("name", "Dungeons");
+		slots.add(first);
+		loadout.add("slots", slots);
+		member.add("loadout", loadout);
+		var loadouts = io.github.streetinman.skyblockpv.core.parse.ProfileParser.parseLoadouts(member);
+		assertEquals(java.util.Set.of("slots 1 armor"), loadouts.keySet());
+		assertEquals("LOADOUT_HELM", loadouts.get("slots 1 armor").getFirst().skyblockId());
+
+		JsonObject skillTree = new JsonObject();
+		skillTree.add("experience", obj("mining", 400_000));
+		member.add("skill_tree", skillTree);
+		assertEquals(400_000, ProfileParser.parseExtras(member, 1).hotmXp());
+	}
+
 	private static JsonObject response(JsonObject member, boolean nullProfiles) {
 		JsonObject root = new JsonObject();
 		root.addProperty("success", true);

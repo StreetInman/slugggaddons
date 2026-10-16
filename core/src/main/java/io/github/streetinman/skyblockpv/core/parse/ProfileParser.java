@@ -106,10 +106,11 @@ public final class ProfileParser {
 				parsePets(path(member, "pets_data")),
 				parseEssence(path(member, "currencies", "essence")),
 				parsePower(obj(member, "accessory_bag_storage")),
-				parseExtras(member, coopMembers));
+				parseExtras(member, coopMembers),
+				parseLoadouts(member));
 	}
 
-	static ProfileExtras parseExtras(JsonObject member, int coopMembers) {
+	public static ProfileExtras parseExtras(JsonObject member, int coopMembers) {
 		JsonObject stats = obj(member, "player_stats");
 		JsonObject mining = obj(member, "mining_core");
 		JsonObject nether = obj(member, "nether_island_player_data");
@@ -125,7 +126,8 @@ public final class ProfileParser {
 				(long) num(obj(stats, "items_fished"), "total"),
 				(long) num(obj(stats, "gifts"), "total_given"),
 				(long) num(obj(stats, "gifts"), "total_received"),
-				num(mining, "experience"),
+				// HOTM XP moved from mining_core to skill_tree in the 2024 skill tree update.
+				Math.max(num(mining, "experience"), num(path(member, "skill_tree", "experience"), "mining")),
 				(long) (num(mining, "powder_mithril") + num(mining, "powder_spent_mithril")),
 				(long) (num(mining, "powder_gemstone") + num(mining, "powder_spent_gemstone")),
 				(long) (num(mining, "powder_glacite") + num(mining, "powder_spent_glacite")),
@@ -139,6 +141,41 @@ public final class ProfileParser {
 				obj(jacob, "contests") == null ? 0 : obj(jacob, "contests").size(),
 				(long) num(obj(member, "currencies"), "motes_purse"),
 				generators != null && generators.isJsonArray() ? generators.getAsJsonArray().size() : 0);
+	}
+
+	/**
+	 * Loadouts are new and their layout isn't documented, so this collects every encoded item list
+	 * anywhere under {@code loadout} (or {@code loadouts}), labelled by its path, e.g. "1 armor".
+	 */
+	public static Map<String, List<SkyblockItem>> parseLoadouts(JsonObject member) {
+		Map<String, List<SkyblockItem>> found = new java.util.LinkedHashMap<>();
+		for (String key : new String[] {"loadout", "loadouts"}) {
+			JsonElement root = member.get(key);
+			if (root != null) collectItemLists(root, "", found, 0);
+		}
+		return Collections.unmodifiableMap(found);
+	}
+
+	private static void collectItemLists(JsonElement e, String label, Map<String, List<SkyblockItem>> found, int depth) {
+		if (depth > 6 || e == null) return;
+		if (e.isJsonObject()) {
+			JsonObject o = e.getAsJsonObject();
+			if (o.has("data") && o.get("data").isJsonPrimitive()) {
+				try {
+					List<SkyblockItem> items = decodeData(o);
+					if (items != null) found.put(label.isBlank() ? "Loadout" : label.trim(), items);
+				} catch (IOException | RuntimeException ignored) {
+					// Not an item list after all.
+				}
+				return;
+			}
+			for (Map.Entry<String, JsonElement> child : o.entrySet()) {
+				collectItemLists(child.getValue(), label + " " + child.getKey(), found, depth + 1);
+			}
+		} else if (e.isJsonArray()) {
+			int i = 1;
+			for (JsonElement child : e.getAsJsonArray()) collectItemLists(child, label + " " + i++, found, depth + 1);
+		}
 	}
 
 	private static Map<String, Integer> intMap(JsonObject o) {

@@ -56,7 +56,7 @@ public final class HypixelClient {
 	private CompletableFuture<JsonObject> get(String path, boolean needsKey) {
 		HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(baseUrl.get() + path))
 				.timeout(Duration.ofSeconds(15))
-				.header("User-Agent", "skyblock-pv")
+				.header("User-Agent", "slugggaddons")
 				.GET();
 		String key = apiKey.get();
 		if (needsKey && key != null && !key.isBlank()) {
@@ -73,7 +73,7 @@ public final class HypixelClient {
 
 	static JsonObject parse(int status, String body) {
 		switch (status) {
-			case 403 -> throw new ApiException(ApiException.Kind.INVALID_KEY, "API key is missing or invalid. Set it in config/skyblock-pv.json");
+			case 403 -> throw new ApiException(ApiException.Kind.INVALID_KEY, "API key is missing or invalid. Set it in config/slugggaddons.json");
 			case 429 -> throw new ApiException(ApiException.Kind.RATE_LIMITED, "Too many requests, try again in a minute");
 			default -> {
 			}

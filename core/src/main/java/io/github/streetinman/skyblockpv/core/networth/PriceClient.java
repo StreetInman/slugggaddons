@@ -39,7 +39,7 @@ public final class PriceClient {
 	private CompletableFuture<java.util.Map<String, Double>> lowestBin() {
 		HttpRequest request = HttpRequest.newBuilder(URI.create(lowestBinUrl.get()))
 				.timeout(Duration.ofSeconds(20))
-				.header("User-Agent", "skyblock-pv")
+				.header("User-Agent", "slugggaddons")
 				.GET().build();
 		return http.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(response -> {
 			if (response.statusCode() != 200) {

@@ -36,7 +36,7 @@ public final class RepoDownloader {
 		}
 		Path partial = zip.resolveSibling(zip.getFileName() + ".part");
 		HttpRequest request = HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofMinutes(3))
-				.header("User-Agent", "skyblock-pv").GET().build();
+				.header("User-Agent", "slugggaddons").GET().build();
 		return http.sendAsync(request, HttpResponse.BodyHandlers.ofFile(partial)).handle((response, error) -> {
 			try {
 				if (error == null && response.statusCode() == 200) {

@@ -44,6 +44,7 @@ public class PvScreen extends Screen {
 	private static final int PANEL_WIDTH = 370;
 	/** Player model column to the left of the panel; dropped when the window is too narrow. */
 	private static final int SIDEBAR_WIDTH = 86;
+	private static final int MODEL_HEIGHT = 120;
 	private static final int SIDEBAR_GAP = 4;
 	private static final int BORDER = 0xFF3A3A5C;
 	private static final int ACCENT = 0xFF6C6CFF;
@@ -79,7 +80,7 @@ public class PvScreen extends Screen {
 
 	private enum Tab {
 		OVERVIEW("Stats"), SKILLS("Skills"), DUNGEONS("Dungeons"), INVENTORY("Inv"), STORAGE("Storage"),
-		ACCESSORIES("Accs"), PETS("Pets"), TROPHY_FISH("Trophy"), MISC("Misc");
+		WARDROBE("Wardrobe"), ACCESSORIES("Accs"), PETS("Pets"), TROPHY_FISH("Trophy"), MISC("Misc");
 
 		final String label;
 
@@ -103,6 +104,7 @@ public class PvScreen extends Screen {
 	private ProfileService.Lookup lookup;
 	private Profile profile;
 	private DungeonPlan dungeonPlan;
+	private List<StoragePage> wardrobePages = List.of();
 	private List<StoragePage> storagePages = List.of();
 	private Prices prices;
 	private Networth networth;
@@ -118,6 +120,8 @@ public class PvScreen extends Screen {
 	/** Left edge of the whole window: the sidebar if shown, else the panel. */
 	private int frameLeft;
 	private boolean showSidebar;
+	private SkinPreview skin;
+	private net.minecraft.client.gui.components.PlayerSkinWidget skinWidget;
 	private List<io.github.streetinman.skyblockpv.core.model.Pet> sortedPets = List.of();
 	private ItemStack hoveredStack;
 	private final List<net.minecraft.client.gui.components.AbstractWidget> panelWidgets = new ArrayList<>();
@@ -141,6 +145,11 @@ public class PvScreen extends Screen {
 			} else {
 				lookup = result;
 				selectProfile(result.selected());
+				try {
+					skin = new SkinPreview(result.player().uuid(), result.player().name());
+				} catch (RuntimeException e) {
+					SkyblockPvClient.LOGGER.warn("Couldn't set up the player model", e);
+				}
 			}
 			rebuildWidgets();
 		}, Minecraft.getInstance());
@@ -167,6 +176,7 @@ public class PvScreen extends Screen {
 				DungeonCalculator.runsToCatacombs50(d.catacombsXp(), d.masterCompletions().getOrDefault(7, 0), DungeonCalculator.M7_BASE_XP, boosts),
 				DungeonCalculator.classAverage50(d.classXp(), DungeonCalculator.M7_BASE_XP, boosts));
 		storagePages = storagePages(m.inventories());
+		wardrobePages = wardrobePages(m);
 		sortedPets = m.pets().stream().sorted(java.util.Comparator
 				.comparing(io.github.streetinman.skyblockpv.core.model.Pet::active).reversed()
 				.thenComparing(java.util.Comparator.comparingInt(io.github.streetinman.skyblockpv.core.model.Pet::tierIndex).reversed())
@@ -190,7 +200,7 @@ public class PvScreen extends Screen {
 
 	@Override
 	protected void init() {
-		showSidebar = config.gui.showPlayerModel && width >= PANEL_WIDTH + SIDEBAR_WIDTH + SIDEBAR_GAP + 10;
+		showSidebar = config.gui.showSidebar && width >= PANEL_WIDTH + SIDEBAR_WIDTH + SIDEBAR_GAP + 10;
 		int frameWidth = PANEL_WIDTH + (showSidebar ? SIDEBAR_WIDTH + SIDEBAR_GAP : 0);
 		frameLeft = (width - frameWidth) / 2;
 		left = frameLeft + (showSidebar ? SIDEBAR_WIDTH + SIDEBAR_GAP : 0);
@@ -214,6 +224,12 @@ public class PvScreen extends Screen {
 				rebuildWidgets();
 			}).bounds(x, top - 22, w, 20).build()).active = t != tab;
 			x += w + gap;
+		}
+
+		skinWidget = null;
+		if (showSidebar && skin != null) {
+			skinWidget = panelWidget(skin.widget(SIDEBAR_WIDTH - 8, MODEL_HEIGHT));
+			skinWidget.setPosition(frameLeft + 4, top + 4);
 		}
 
 		// Look up someone else without closing the window.
@@ -288,6 +304,7 @@ public class PvScreen extends Screen {
 				case DUNGEONS -> drawDungeons(g, contentTop, mouseX, mouseY);
 				case INVENTORY -> drawInventory(g, contentTop, mouseX, mouseY);
 				case STORAGE -> drawStorage(g, contentTop, mouseX, mouseY);
+				case WARDROBE -> drawWardrobe(g, contentTop, mouseX, mouseY);
 				case ACCESSORIES -> drawAccessories(g, contentTop, mouseX, mouseY);
 				case PETS -> drawPets(g, contentTop, mouseX, mouseY);
 				case TROPHY_FISH -> drawTrophyFish(g, contentTop);
@@ -557,6 +574,49 @@ public class PvScreen extends Screen {
 		drawGrid(g, items.subList(0, Math.min(9, items.size())), gridX, y + 10 + 3 * SLOT + 4, 9, mouseX, mouseY);
 	}
 
+	/**
+	 * Wardrobe pages laid out like the game (a column per set: helmet, chestplate, leggings,
+	 * boots), then one page per loadout.
+	 */
+	private static List<StoragePage> wardrobePages(MemberData m) {
+		List<StoragePage> pages = new ArrayList<>();
+		Inventories inv = m.inventories();
+		io.github.streetinman.skyblockpv.core.model.Wardrobe wardrobe = inv.wardrobe();
+		if (wardrobe != null && !wardrobe.slots().isEmpty()) {
+			var slots = wardrobe.slots();
+			for (int from = 0, n = 1; from < slots.size(); from += 9, n++) {
+				List<SkyblockItem> grid = new ArrayList<>(java.util.Collections.nCopies(36, (SkyblockItem) null));
+				for (int c = 0; c < 9 && from + c < slots.size(); c++) {
+					var slot = slots.get(from + c);
+					SkyblockItem[] pieces = {slot.helmet(), slot.chestplate(), slot.leggings(), slot.boots()};
+					// The worn set lives in the armor slots, not the wardrobe.
+					if (slot.number() == wardrobe.equippedSlot() && slot.isEmpty() && inv.armor() != null) {
+						for (int r = 0; r < 4 && r < inv.armor().size(); r++) pieces[r] = inv.armor().get(r);
+					}
+					for (int r = 0; r < 4; r++) grid.set(r * 9 + c, pieces[r]);
+				}
+				String worn = wardrobe.equippedSlot() > from && wardrobe.equippedSlot() <= from + 9
+						? " §7(wearing slot " + wardrobe.equippedSlot() + ")" : "";
+				pages.add(new StoragePage("Wardrobe page " + n + worn, grid));
+			}
+		}
+		m.loadouts().forEach((name, items) -> pages.add(new StoragePage("Loadout: " + titleCase(name.replace(' ', '_')), items)));
+		return List.copyOf(pages);
+	}
+
+	private void drawWardrobe(GuiGraphicsExtractor g, int y, int mouseX, int mouseY) {
+		if (wardrobePages.isEmpty()) {
+			g.text(font, "§7No wardrobe or loadouts visible (inventory API off?).", left + 8, y, WHITE, false);
+			return;
+		}
+		StoragePage current = wardrobePages.get(Math.min(page, wardrobePages.size() - 1));
+		g.text(font, "§e" + fit(current.title(), PANEL_WIDTH - 16), left + 8, y, WHITE, false);
+		drawGrid(g, current.items(), left + 8, y + 11, 9, mouseX, mouseY);
+		if (profile.member().loadouts().isEmpty() && page == 0) {
+			g.text(font, "§8No loadouts found in this profile's API data.", left + 8, y + 11 + 4 * SLOT + 6, WHITE, false);
+		}
+	}
+
 	private void drawStorage(GuiGraphicsExtractor g, int y, int mouseX, int mouseY) {
 		if (storagePages.isEmpty()) {
 			g.text(font, "§7No ender chest or backpacks visible (inventory API off?).", left + 8, y, WHITE, false);
@@ -649,9 +709,10 @@ public class PvScreen extends Screen {
 	private void drawSidebar(GuiGraphicsExtractor g, int mouseX, int mouseY) {
 		int x = frameLeft;
 		frame(g, x, top, SIDEBAR_WIDTH, PANEL_HEIGHT);
+		if (skinWidget != null) SkinPreview.lookAt(skinWidget, mouseX, mouseY);
 		if (profile == null) return;
 		MemberData m = profile.member();
-		int y = top + 8;
+		int y = top + (skinWidget != null ? MODEL_HEIGHT + 10 : 8);
 		List<String> lines = new ArrayList<>();
 		lines.add("§bLvl " + (int) m.skyblockLevel());
 		lines.add("§6" + (networth != null ? compact((long) networth.total()) : "…") + " §7NW");
@@ -740,27 +801,29 @@ public class PvScreen extends Screen {
 		general.add("§7Motes: §d" + num(e.motes()));
 		general.add("§7Pets: §f" + profile.member().pets().size());
 		general.add("§7Trophy Fish: §f" + profile.member().trophyFishing().totalCaught());
-		drawLines(g, general, left + 8, y);
+		drawLines(g, general.stream().map(line -> fit(line, 178)).toList(), left + 8, y);
 
 		List<String> other = new ArrayList<>();
 		other.add("§bMining");
 		other.add("§7HotM: §f" + e.hotmTier() + " §8(" + compact((long) e.hotmXp()) + " XP)");
 		other.add("§7Powder: §2" + compact(e.mithrilPowder()) + " §d" + compact(e.gemstonePowder()) + " §b" + compact(e.glacitePowder()));
 		other.add("§cCrimson Isle");
-		other.add("§7Faction: §f" + (e.crimsonFaction() == null ? "none" : titleCase(e.crimsonFaction()))
-				+ " §8(" + compact(e.mageReputation()) + " mage, " + compact(e.barbarianReputation()) + " barb)");
+		other.add("§7Faction: §f" + (e.crimsonFaction() == null ? "none" : titleCase(e.crimsonFaction())));
+		other.add("§7Reputation: §5" + compact(e.mageReputation()) + " §7mage, §c" + compact(e.barbarianReputation()) + " §7barb");
 		StringBuilder kuudra = new StringBuilder("§7Kuudra: §f" + e.kuudraTotal());
 		String[] tiers = {"none", "hot", "burning", "fiery", "infernal"};
 		String[] short_ = {"B", "H", "Bu", "F", "I"};
-		kuudra.append(" §8(");
-		for (int i = 0; i < tiers.length; i++) kuudra.append(i == 0 ? "" : " ").append(short_[i]).append(e.kuudraCompletions().getOrDefault(tiers[i], 0));
-		other.add(kuudra.append(")").toString());
+		other.add(kuudra.toString());
+		StringBuilder kuudraTiers = new StringBuilder("§8");
+		for (int i = 0; i < tiers.length; i++) kuudraTiers.append(i == 0 ? "" : " ").append(short_[i]).append(e.kuudraCompletions().getOrDefault(tiers[i], 0));
+		other.add(kuudraTiers.toString());
 		other.add("§aFarming");
-		other.add("§7Medals: §6" + e.jacobMedals().getOrDefault("gold", 0) + " §f" + e.jacobMedals().getOrDefault("silver", 0)
-				+ " §c" + e.jacobMedals().getOrDefault("bronze", 0));
-		other.add("§7Contests: §f" + e.jacobContests() + " §7Farming cap: §f+" + e.jacobFarmingLevelCap());
+		other.add("§7Medals: §6" + e.jacobMedals().getOrDefault("gold", 0) + "g §f" + e.jacobMedals().getOrDefault("silver", 0)
+				+ "s §c" + e.jacobMedals().getOrDefault("bronze", 0) + "b");
+		other.add("§7Contests: §f" + e.jacobContests());
+		other.add("§7Farming cap: §f+" + e.jacobFarmingLevelCap());
 		other.add("§7Double Drops: §f" + e.jacobDoubleDrops() + "/15");
-		drawLines(g, other, left + 190, y);
+		drawLines(g, other.stream().map(line -> fit(line, PANEL_WIDTH - 196)).toList(), left + 190, y);
 	}
 
 	private static String num(long value) {
@@ -793,6 +856,7 @@ public class PvScreen extends Screen {
 		Inventories inv = profile.member().inventories();
 		return switch (tab) {
 			case STORAGE -> Math.max(1, storagePages.size());
+			case WARDROBE -> Math.max(1, wardrobePages.size());
 			case DUNGEONS -> 2;
 			case PETS -> Math.max(1, (sortedPets.size() + PETS_PER_PAGE - 1) / PETS_PER_PAGE);
 			case ACCESSORIES -> inv.accessoryBag() == null ? 1

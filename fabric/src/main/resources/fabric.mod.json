@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "skyblockpv",
+  "id": "slugggaddons",
   "version": "${version}",
-  "name": "SkyBlock Profile Viewer",
-  "description": "View any Hypixel SkyBlock player's stats, gear, storage, dungeons and trophy fishing in game with /pv.",
+  "name": "SlugggAddons",
+  "description": "Client-side Hypixel SkyBlock tweaks: a full profile viewer (/pv), item and recipe browser, player model and item animation tweaks, and positional party messages.",
   "authors": ["StreetInman"],
   "contact": {
     "sources": "https://github.com/StreetInman/skyblock-pv",

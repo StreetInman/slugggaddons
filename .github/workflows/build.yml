@@ -43,8 +43,8 @@ jobs:
           done
       - uses: actions/upload-artifact@v4
         with:
-          name: skyblock-pv-mc${{ matrix.mc }}
-          path: fabric/build/libs/skyblock-pv-*[0-9].jar
+          name: slugggaddons-mc${{ matrix.mc }}
+          path: fabric/build/libs/slugggaddons-*[0-9].jar
 
   # Starts the game once per version under a virtual display to make sure every mixin applies.
   # Mixin targets are only checked at runtime, so a green compile alone can still crash on launch.

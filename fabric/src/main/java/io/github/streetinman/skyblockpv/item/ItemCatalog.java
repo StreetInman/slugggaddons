@@ -40,7 +40,7 @@ public final class ItemCatalog {
 	/** Starts (or returns) the download and parse. Safe to call every time a screen opens. */
 	public static synchronized CompletableFuture<ItemRepository> repository() {
 		if (loading == null || loading.isCompletedExceptionally()) {
-			Path zip = FabricLoader.getInstance().getConfigDir().resolve("skyblock-pv/neu-repo.zip");
+			Path zip = FabricLoader.getInstance().getConfigDir().resolve("slugggaddons/neu-repo.zip");
 			loading = new RepoDownloader().ensure(SkyblockPvClient.config().itemRepoUrl, zip).thenApplyAsync(path -> {
 				try {
 					return ItemRepository.load(path);

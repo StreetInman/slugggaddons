@@ -29,5 +29,7 @@ public record MemberData(
 		java.util.List<Pet> pets,
 		Map<String, Long> essence,
 		AccessoryPower power,
-		ProfileExtras extras) {
+		ProfileExtras extras,
+		/** Every item list found under the profile's {@code loadout} data, keyed by where it was found. */
+		Map<String, java.util.List<SkyblockItem>> loadouts) {
 }

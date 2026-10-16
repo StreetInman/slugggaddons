@@ -25,19 +25,20 @@ import io.github.streetinman.skyblockpv.core.api.HypixelClient;
 import io.github.streetinman.skyblockpv.core.api.MojangClient;
 import io.github.streetinman.skyblockpv.core.api.ProfileService;
 import io.github.streetinman.skyblockpv.core.networth.PriceClient;
+import io.github.streetinman.skyblockpv.feature.PositionalMessages;
 import io.github.streetinman.skyblockpv.gui.PvScreen;
 import io.github.streetinman.skyblockpv.gui.ItemBrowserScreen;
 import io.github.streetinman.skyblockpv.gui.SettingsScreen;
 
 /**
- * Registers {@code /pv [player]} (also {@code /spv} and {@code /sbpv}), {@code /skyblockpv} for
- * settings, and {@code /pvdump <player>}.
+ * SlugggAddons. Registers {@code /pv [player]} (also {@code /spv} and {@code /sbpv}),
+ * {@code /slugggaddons} for settings, {@code /sbitems}, {@code /posmsg} and {@code /pvdump <player>}.
  *
  * <p>Everything here is read-only: the mod calls the public Hypixel API over HTTPS and draws its
  * own screen. It never sends packets to the server or acts on the player's behalf.
  */
 public final class SkyblockPvClient implements ClientModInitializer {
-	public static final Logger LOGGER = LoggerFactory.getLogger("skyblock-pv");
+	public static final Logger LOGGER = LoggerFactory.getLogger("slugggaddons");
 
 	private static final String[] COMMAND_NAMES = {"pv", "spv", "sbpv"};
 	private static final String[] ITEM_COMMAND_NAMES = {"sbitems", "sbrecipe"};
@@ -49,7 +50,9 @@ public final class SkyblockPvClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		configFile = FabricLoader.getInstance().getConfigDir().resolve("skyblock-pv.json");
+		Path configDir = FabricLoader.getInstance().getConfigDir();
+		configFile = configDir.resolve("slugggaddons.json");
+		migrateOldFiles(configDir);
 		config = PvConfig.load(configFile);
 
 		HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
@@ -57,6 +60,7 @@ public final class SkyblockPvClient implements ClientModInitializer {
 		profiles = new ProfileService(new MojangClient(http), hypixel);
 		prices = new PriceClient(http, hypixel, () -> config.lowestBinUrl);
 
+		PositionalMessages.register();
 		if ("1".equals(System.getenv("SKYBLOCKPV_SELFTEST"))) SelfTest.start();
 
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
@@ -67,11 +71,15 @@ public final class SkyblockPvClient implements ClientModInitializer {
 						.then(ClientCommands.argument("player", StringArgumentType.word())
 								.executes(ctx -> open(StringArgumentType.getString(ctx, "player")))));
 			}
-			dispatcher.register(ClientCommands.literal("skyblockpv").executes(ctx -> {
-				Minecraft mc = Minecraft.getInstance();
-				mc.schedule(() -> Compat.setScreen(new SettingsScreen(config, SkyblockPvClient::saveConfig)));
-				return 1;
-			}).then(ClientCommands.literal("items").executes(ctx -> openItems(""))));
+			// Settings: /slugggaddons, with the old /skyblockpv kept as an alias.
+			for (String name : new String[] {"slugggaddons", "skyblockpv"}) {
+				dispatcher.register(ClientCommands.literal(name).executes(ctx -> {
+					Minecraft mc = Minecraft.getInstance();
+					mc.schedule(() -> Compat.setScreen(new SettingsScreen(config, SkyblockPvClient::saveConfig)));
+					return 1;
+				}).then(ClientCommands.literal("items").executes(ctx -> openItems(""))));
+			}
+			PositionalMessages.registerCommands(dispatcher);
 			for (String name : ITEM_COMMAND_NAMES) {
 				dispatcher.register(ClientCommands.literal(name)
 						.executes(ctx -> openItems(""))
@@ -82,6 +90,19 @@ public final class SkyblockPvClient implements ClientModInitializer {
 					.then(ClientCommands.argument("player", StringArgumentType.word())
 							.executes(SkyblockPvClient::dump)));
 		});
+	}
+
+	/** Before the rename to SlugggAddons the config and data lived under "skyblock-pv". */
+	private static void migrateOldFiles(Path configDir) {
+		try {
+			Path oldConfig = configDir.resolve("skyblock-pv.json");
+			if (!Files.exists(configFile) && Files.exists(oldConfig)) Files.copy(oldConfig, configFile);
+			Path oldDir = configDir.resolve("skyblock-pv");
+			Path newDir = configDir.resolve("slugggaddons");
+			if (!Files.exists(newDir) && Files.isDirectory(oldDir)) Files.move(oldDir, newDir);
+		} catch (java.io.IOException e) {
+			LOGGER.warn("Couldn't move old skyblock-pv settings", e);
+		}
 	}
 
 	public static int open(String player) {
@@ -106,7 +127,7 @@ public final class SkyblockPvClient implements ClientModInitializer {
 				return;
 			}
 			try {
-				Path file = FabricLoader.getInstance().getConfigDir().resolve("skyblock-pv/dumps/" + lookup.player().name() + ".json");
+				Path file = FabricLoader.getInstance().getConfigDir().resolve("slugggaddons/dumps/" + lookup.player().name() + ".json");
 				Files.createDirectories(file.getParent());
 				Files.writeString(file, new GsonBuilder().setPrettyPrinting().create().toJson(lookup.raw()));
 				source.sendFeedback(Component.literal("Saved API response to " + file));
