@@ -163,9 +163,9 @@ public final class PositionalMessages {
 			boolean in = dx * dx + dy * dy + dz * dz <= m.radius * m.radius;
 			if (in && inside.add(m.name)) {
 				String text = fill(m.message);
-				player.displayClientMessage(prefix().append(Component.literal(m.name + ": ").withStyle(ChatFormatting.YELLOW))
+				player.sendSystemMessage(prefix().append(Component.literal(m.name + ": ").withStyle(ChatFormatting.YELLOW))
 						.append(Component.literal(text).withStyle(ChatFormatting.WHITE))
-						.append(Component.literal(" [Click to send to party]").withStyle(sendStyle(text))), false);
+						.append(Component.literal(" [Click to send to party]").withStyle(sendStyle(text))));
 				if (SkyblockPvClient.config().positionalMessagesOpenChat) openChat("/pc " + text);
 			} else if (!in) {
 				inside.remove(m.name);
