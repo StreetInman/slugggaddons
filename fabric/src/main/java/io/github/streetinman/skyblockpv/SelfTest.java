@@ -103,6 +103,7 @@ final class SelfTest {
 				if (!(screen instanceof PvScreen pv)) throw new IllegalStateException("/pv closed: " + screen);
 				int tabs = PvScreen.tabLabels().size();
 				if (step >= tabs * 3) {
+					SkyblockPvClient.LOGGER.info("SKYBLOCKPV SELFTEST /pv player model shown: {}", pv.showsModel());
 					next("opening item browser");
 					return;
 				}

@@ -69,6 +69,10 @@ public class PvScreen extends Screen {
 		rebuildWidgets();
 	}
 
+	public boolean showsModel() {
+		return skinWidget != null;
+	}
+
 	public boolean loaded() {
 		return profile != null || error != null;
 	}
