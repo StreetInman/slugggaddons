@@ -1,9 +1,2 @@
 # <class> <regex>  or  find <regex>
-net.minecraft.client.gui.components.PlayerSkinWidget PlayerSkinWidget\(|void |float |private
-net.minecraft.client.gui.GuiGraphicsExtractor skin|entity\(
-net.minecraft.client.renderer.entity.LivingEntityRenderer scale|void submit|setupRotations
-net.minecraft.client.resources.SkinManager public
-net.minecraft.world.entity.player.PlayerSkin public
-net.minecraft.client.Minecraft getEntityModels|EntityModelSet
-net.minecraft.client.gui.screens.ChatScreen ChatScreen\(
-net.minecraft.network.chat.ClickEvent SuggestCommand|record|suggest
+net.minecraft.client.multiplayer.ClientPacketListener sendCommand|sendChat|sendUnsignedCommand
