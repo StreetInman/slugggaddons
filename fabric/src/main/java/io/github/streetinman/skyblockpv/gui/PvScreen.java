@@ -204,18 +204,22 @@ public class PvScreen extends Screen {
 		int frameWidth = PANEL_WIDTH + (showSidebar ? SIDEBAR_WIDTH + SIDEBAR_GAP : 0);
 		frameLeft = (width - frameWidth) / 2;
 		left = frameLeft + (showSidebar ? SIDEBAR_WIDTH + SIDEBAR_GAP : 0);
-		top = (height - PANEL_HEIGHT) / 2 + 10;
+		// Keep the tab row on screen: a button drawn partly off screen crashes the game (scissor out of bounds).
+		top = Math.max(23, (height - PANEL_HEIGHT) / 2 + 10);
 
 		panelWidgets.clear();
 		// Tabs share the whole window width: each gets its label width plus an equal share of what's left.
 		int gap = 2;
-		int natural = 0;
-		for (Tab t : Tab.values()) natural += font.width(t.label) + 6;
-		int spare = frameWidth - natural - gap * (Tab.values().length - 1);
+		int labels = 0;
+		for (Tab t : Tab.values()) labels += font.width(t.label);
+		// Normal padding, or less when the window is too narrow for every label at full padding.
+		int padding = Math.max(2, Math.min(6, (frameWidth - labels - gap * (Tab.values().length - 1)) / Tab.values().length));
+		int natural = labels + padding * Tab.values().length;
+		int spare = Math.max(0, frameWidth - natural - gap * (Tab.values().length - 1));
 		int x = frameLeft;
 		for (int i = 0; i < Tab.values().length; i++) {
 			Tab t = Tab.values()[i];
-			int w = font.width(t.label) + 6 + spare / Tab.values().length;
+			int w = font.width(t.label) + padding + spare / Tab.values().length;
 			// Give rounding leftovers to the last tab so the row ends exactly at the window edge.
 			if (i == Tab.values().length - 1) w = frameLeft + frameWidth - x;
 			addRenderableWidget(Button.builder(Component.literal(t.label), b -> {

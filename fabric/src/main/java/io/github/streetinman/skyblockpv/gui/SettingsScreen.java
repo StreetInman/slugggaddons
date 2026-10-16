@@ -67,7 +67,7 @@ public class SettingsScreen extends Screen {
 	@Override
 	protected void init() {
 		left = (width - PANEL_WIDTH) / 2;
-		top = (height - PANEL_HEIGHT) / 2 + 10;
+		top = Math.max(38, (height - PANEL_HEIGHT) / 2 + 10);
 		col1 = left + 6;
 		col2 = left + PANEL_WIDTH - 6 - COLUMN;
 
