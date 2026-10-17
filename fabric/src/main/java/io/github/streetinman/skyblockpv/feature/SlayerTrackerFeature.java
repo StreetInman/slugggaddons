@@ -26,10 +26,12 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -81,6 +83,8 @@ public final class SlayerTrackerFeature {
 	private static Map<String, Long> lastInventory;
 	private static ClientLevel lastLevel;
 	private static long containerClosedAt;
+	/** The open screen; tracked through events because 26.2+ has no public field for it. */
+	private static volatile Screen openScreen;
 	private static int ticks;
 	private static long lastSave;
 	/** Items recently moved out of sacks with /gfs: not drops. */
@@ -118,6 +122,12 @@ public final class SlayerTrackerFeature {
 		}, () -> costMultiplier);
 
 		ClientTickEvents.END_CLIENT_TICK.register(SlayerTrackerFeature::tick);
+		ScreenEvents.AFTER_INIT.register((mc, screen, w, h) -> {
+			openScreen = screen;
+			ScreenEvents.remove(screen).register(removed -> {
+				if (openScreen == removed) openScreen = null;
+			});
+		});
 		ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
 			if (!overlay) onMessage(message);
 		});
@@ -146,7 +156,7 @@ public final class SlayerTrackerFeature {
 			return;
 		}
 		long now = System.currentTimeMillis();
-		boolean container = mc.screen instanceof AbstractContainerScreen<?> && !(mc.screen instanceof InventoryScreen);
+		boolean container = openScreen instanceof AbstractContainerScreen<?> && !(openScreen instanceof InventoryScreen);
 		if (container) containerClosedAt = now;
 		if (++ticks % SCAN_TICKS != 0) return;
 
