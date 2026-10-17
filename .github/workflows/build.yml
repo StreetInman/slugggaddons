@@ -37,7 +37,13 @@ jobs:
               echo "::notice title=find $pattern ${{ matrix.mc }}::$out"
               continue
             fi
-            cp="$jar:$(find ~/.gradle/caches/modules-2 -name 'authlib-*.jar' -not -name '*sources*' 2>/dev/null | sort -V | tr '\n' ':')"
+            fapi=$(find ~/.gradle/caches .gradle -name 'fabric-*.jar' -not -name '*sources*' 2>/dev/null | tr '\n' ':')
+            if [ "$c" = "fapifind" ]; then
+              out=$(for f in $(echo "$fapi" | tr ':' ' '); do unzip -Z1 "$f" 2>/dev/null; done | grep -E "$pattern" | sort -u | head -40 | tr '\n' '|')
+              echo "::notice title=fapifind $pattern ${{ matrix.mc }}::$out"
+              continue
+            fi
+            cp="$jar:$fapi$(find ~/.gradle/caches/modules-2 -name 'authlib-*.jar' -not -name '*sources*' 2>/dev/null | sort -V | tr '\n' ':')"
             out=$(javap -p -cp "$cp" "$c" 2>&1 | grep -E "$pattern" | grep -v 'lambda\$' | sed -e 's/^ *//' -e 's/net\.minecraft\.//g' -e 's/com\.mojang\.//g' | tr '\n' '|' | sed 's/%/%25/g')
             echo "::notice title=$c ${{ matrix.mc }}::$out"
           done

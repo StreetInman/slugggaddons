@@ -1,8 +1,11 @@
-# <class> <regex>  or  find <regex>
-find fabric/api/client/rendering/v1/hud/|fabric/api/client/message/v1/
-net.minecraft.world.scores.Scoreboard getDisplayObjective|listPlayerScores|getPlayersTeam|public java.util.Collection
-net.minecraft.world.scores.PlayerTeam getPlayerPrefix|getPlayerSuffix|formatNameForTeam
-net.minecraft.world.scores.PlayerScoreEntry public
-net.minecraft.world.item.component.CustomData copyTag|getUnsafe|public
-net.minecraft.nbt.CompoundTag getStringOr|public java.util.Optional<java.lang.String> getString
-net.minecraft.network.chat.HoverEvent\$ShowText public
+# <class> <regex>  or  find <regex>  or  fapifind <regex> (inside Fabric API jars)
+fapifind rendering/v1/hud/.*class|message/v1/.*class|HudRenderCallback
+net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry public
+net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement public
+net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements public
+net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents public
+net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents$Game public
+net.minecraft.world.entity.player.Inventory getItem|getNonEquipmentItems|getContainerSize
+net.minecraft.network.chat.HoverEvent public
+net.minecraft.client.gui.GuiGraphicsExtractor public .* (text|fill|pose|drawString)
+net.minecraft.client.DeltaTracker public
