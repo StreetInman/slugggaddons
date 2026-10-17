@@ -58,7 +58,7 @@ Hover the calculator to see exactly which boosts were found. Boosts the API can'
 ### Settings (`/slugggaddons`)
 
 `/slugggaddons` (or the old `/skyblockpv`) opens the mod's settings, split into tabs by area of the game: General, GUI, Player,
-Animations, Dungeons, Garden, Mining and Fishing. New tweaks land in the tab they belong to.
+Animations, Dungeons, Slayer, Garden, Mining and Fishing. New tweaks land in the tab they belong to.
 Everything there is client-side and only changes what you see:
 
 - **GUI**: show or hide the model and summary column in `/pv`, and pick which tab `/pv` opens on.
@@ -72,6 +72,30 @@ Everything there is client-side and only changes what you see:
   skipping the dip when you switch items. On 26.1.2 and 26.2 swing speed can be slower or faster;
   on 26.3, where swing timing is tied into combat, only the drawn animation is sped up, so it can only
   be made faster.
+
+### Slayer tracker
+
+A drop and profit tracker for every slayer: Revenant, Tarantula, Sven, Voidgloom, Inferno and
+Riftstalker. It works anywhere you do the quest, including the Howling Cave on the Park. While a
+slayer quest is on your sidebar it counts:
+
+- **Bosses** killed (from "NICE! SLAYER BOSS SLAIN!") and bosses per hour.
+- **Drops** that land in your inventory, plus items that go straight to your sacks (read from the
+  "[Sacks]" message). Inventory changes while a chest or menu is open, and items taken out with
+  `/gfs`, aren't counted.
+- **Quest cost** for the tier you started (halved while Aatrox's Slashed Pricing is active).
+- **Profit** and profit per hour of quest time, with drops valued at bazaar instant-sell or lowest BIN.
+
+It keeps three trackers at once, and the box on screen shows the one you pick:
+
+- **Session**: starts over each time you join, every day, every week, after a break, or only when you
+  reset it (pick in the Slayer settings; "New day at" sets the hour a day starts).
+- **Mayor**: starts over when a new mayor takes office.
+- **Total**: everything since you installed it.
+
+Use `/slayertracker` to print all three in chat, `/slayertracker mode` to switch the box, and
+`/slayertracker reset session` (or `mayor`, `total`) to clear one. Counts are saved in
+`config/slugggaddons/slayer-tracker.json`.
 
 ### Networth
 
@@ -90,7 +114,8 @@ policy bans mods that give an advantage, automate actions, or change how the cli
 talks to the server. This mod does none of those:
 
 - It reads the **official public Hypixel API** over HTTPS, the same data sites like SkyCrypt use.
-- It only draws its own screen and changes how things look on your screen. It never sends
+- It only draws its own screen and changes how things look on your screen. The slayer tracker only
+  reads chat, the sidebar and your inventory. It never sends
   packets to the server, never clicks or types for you, and never reveals information the game
   hides. Player size and item animations don't touch hitboxes, attack timing or anything the
   server sees.
@@ -103,7 +128,7 @@ As with any mod, Hypixel says all mods are used at your own risk.
    [Fabric API](https://modrinth.com/mod/fabric-api) mod for your Minecraft version.
 2. Download the jar for your Minecraft version from
    [Releases](https://github.com/StreetInman/slugggaddons/releases) (for example
-   `slugggaddons-0.4.1+26.1.2.jar`) and put it in your `mods` folder. Remove any older
+   `slugggaddons-0.5.0+26.1.2.jar`) and put it in your `mods` folder. Remove any older
    `skyblock-pv` jar.
 3. Start the game once. The mod creates `config/slugggaddons.json` (copying your old
    `skyblock-pv.json` settings if you had them).
@@ -119,6 +144,7 @@ As with any mod, Hypixel says all mods are used at your own risk.
 | `/spv`, `/sbpv` | Same as `/pv`, for when another mod has taken `/pv` |
 | `/slugggaddons` (or `/skyblockpv`) | Opens the settings |
 | `/sbitems [search]` (or `/sbrecipe`, `/skyblockpv items`) | Item browser: every SkyBlock item, a page at a time, with search, recipes and "used in" |
+| `/slayertracker [slayer]` (or `/sltracker`) | Prints the session, mayor and total slayer tracker in chat. `mode` switches the on-screen box, `reset <session\|mayor\|total>` clears one |
 | `/pvdump <player>` | Saves the raw API response to `config/slugggaddons/dumps/` (for debugging) |
 
 ## Privacy

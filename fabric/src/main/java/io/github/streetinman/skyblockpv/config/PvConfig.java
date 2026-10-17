@@ -49,6 +49,8 @@ public final class PvConfig {
 
 	/** How the /pv window looks. */
 	public Gui gui = new Gui();
+	/** Slayer drop and profit tracker. Counts come from chat, the sidebar and your inventory; nothing is sent. */
+	public Slayer slayer = new Slayer();
 	/** Client-side look of player models. Only changes what you see; nothing is sent to the server. */
 	public PlayerModel playerModel = new PlayerModel();
 	/** Client-side first-person item position, size and swing animation. */
@@ -61,6 +63,37 @@ public final class PvConfig {
 		public double z;
 		public double radius = 3;
 		public String message = "";
+	}
+
+	public static final class Slayer {
+		public boolean enabled = true;
+		/** Draw the tracker on screen. */
+		public boolean showHud = true;
+		/** Hide the on-screen tracker when no slayer quest is running. */
+		public boolean hudOnlyDuringQuest = false;
+		/** Which tracker the on-screen box shows: SESSION, MAYOR or TOTAL. */
+		public io.github.streetinman.skyblockpv.core.slayer.SlayerTracker.Mode mode =
+				io.github.streetinman.skyblockpv.core.slayer.SlayerTracker.Mode.SESSION;
+		/** When the session tracker starts over: LOGIN, DAILY, WEEKLY, BREAK or MANUAL. */
+		public io.github.streetinman.skyblockpv.core.slayer.SessionRule sessionRule =
+				io.github.streetinman.skyblockpv.core.slayer.SessionRule.DAILY;
+		/** Local hour a daily or weekly session starts over (0 = midnight). */
+		public int resetHour = 0;
+		/** For BREAK: minutes without a slayer quest before a new session starts. */
+		public int breakMinutes = 30;
+		/** Top-left corner of the on-screen tracker, as a percentage of the screen. */
+		public double hudX = 1;
+		public double hudY = 25;
+		/** Most item lines shown on screen (the most valuable first). */
+		public int maxItems = 10;
+
+		public io.github.streetinman.skyblockpv.core.slayer.SlayerTracker.Mode mode() {
+			return mode != null ? mode : io.github.streetinman.skyblockpv.core.slayer.SlayerTracker.Mode.SESSION;
+		}
+
+		public io.github.streetinman.skyblockpv.core.slayer.SessionRule sessionRule() {
+			return sessionRule != null ? sessionRule : io.github.streetinman.skyblockpv.core.slayer.SessionRule.DAILY;
+		}
 	}
 
 	public static final class Gui {
@@ -138,6 +171,7 @@ public final class PvConfig {
 				PvConfig config = GSON.fromJson(Files.readString(file), PvConfig.class);
 				if (config != null) {
 					if (config.playerModel != null) config.playerModel.migrate();
+					if (config.slayer == null) config.slayer = new Slayer();
 					// Re-save so settings added in newer versions show up in the file.
 					config.save(file);
 					return config;

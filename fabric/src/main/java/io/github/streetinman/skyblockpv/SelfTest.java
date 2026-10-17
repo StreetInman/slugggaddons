@@ -145,6 +145,11 @@ final class SelfTest {
 				settings.showCategory(step++);
 			}
 			default -> {
+				for (var mode : io.github.streetinman.skyblockpv.core.slayer.SlayerTracker.Mode.values()) {
+					var lines = io.github.streetinman.skyblockpv.feature.SlayerTrackerFeature.lines(
+							io.github.streetinman.skyblockpv.core.slayer.SlayerType.WOLF, mode, 10);
+					SkyblockPvClient.LOGGER.info("SKYBLOCKPV SELFTEST slayer tracker {}: {}", mode.label, String.join(" | ", lines));
+				}
 				SkyblockPvClient.LOGGER.info("SKYBLOCKPV SELFTEST PASSED");
 				phase = -1;
 				mc.stop();

@@ -21,15 +21,15 @@ import io.github.streetinman.skyblockpv.config.PvConfig;
  * the tab for the part of the game they affect.
  */
 public class SettingsScreen extends Screen {
-	private static final int PANEL_WIDTH = 330;
-	private static final int PANEL_HEIGHT = 200;
+	private static final int PANEL_WIDTH = 360;
+	private static final int PANEL_HEIGHT = 220;
 	private static final int COLUMN = 155;
 	private static final int ROW = 22;
 	private static final int WHITE = 0xFFFFFFFF;
 
 	private enum Category {
 		GENERAL("General"), GUI("GUI"), PLAYER("Player"), ANIMATIONS("Animations"), DUNGEONS("Dungeons"),
-		GARDEN("Garden"), MINING("Mining"), FISHING("Fishing");
+		SLAYER("Slayer"), GARDEN("Garden"), MINING("Mining"), FISHING("Fishing");
 
 		final String label;
 
@@ -146,6 +146,39 @@ public class SettingsScreen extends Screen {
 						v -> config.dungeonExplorerLevel = (int) v, autoOrLevel()));
 
 			}
+			case SLAYER -> {
+				PvConfig.Slayer slayer = config.slayer;
+				addRenderableWidget(toggle(col1, y, "Slayer tracker", () -> slayer.enabled, () -> slayer.enabled = !slayer.enabled));
+				addRenderableWidget(toggle(col1, y + ROW, "Show on screen", () -> slayer.showHud, () -> slayer.showHud = !slayer.showHud));
+				addRenderableWidget(toggle(col1, y + 2 * ROW, "Only during quest", () -> slayer.hudOnlyDuringQuest,
+						() -> slayer.hudOnlyDuringQuest = !slayer.hudOnlyDuringQuest));
+				addRenderableWidget(Button.builder(Component.literal("Shows: " + slayer.mode().label), b -> {
+					slayer.mode = slayer.mode().next();
+					b.setMessage(Component.literal("Shows: " + slayer.mode.label));
+				}).bounds(col1, y + 3 * ROW, COLUMN, 20).build());
+				addRenderableWidget(Button.builder(Component.literal("Session: " + slayer.sessionRule().label), b -> {
+					slayer.sessionRule = slayer.sessionRule().next();
+					b.setMessage(Component.literal("Session: " + slayer.sessionRule.label));
+				}).bounds(col1, y + 4 * ROW, COLUMN, 20).build());
+				addRenderableWidget(Button.builder(Component.literal("Reset shown tracker"), b -> {
+					var tracker = io.github.streetinman.skyblockpv.feature.SlayerTrackerFeature.tracker();
+					if (tracker != null) {
+						tracker.reset(slayer.mode(), System.currentTimeMillis());
+						io.github.streetinman.skyblockpv.feature.SlayerTrackerFeature.save();
+					}
+					b.setMessage(Component.literal("§aReset " + slayer.mode().label));
+				}).bounds(col1, y + 5 * ROW, COLUMN, 20).build());
+				addRenderableWidget(new Slider(col2, y, "New day at", 0, 23, 1, () -> slayer.resetHour,
+						v -> slayer.resetHour = (int) v, v -> String.format(Locale.ROOT, "%02.0f:00", v)));
+				addRenderableWidget(new Slider(col2, y + ROW, "Break length", 5, 240, 5, () -> slayer.breakMinutes,
+						v -> slayer.breakMinutes = (int) v, v -> String.format(Locale.ROOT, "%.0f min", v)));
+				addRenderableWidget(new Slider(col2, y + 2 * ROW, "Items shown", 1, 30, 1, () -> slayer.maxItems,
+						v -> slayer.maxItems = (int) v, fixed(0)));
+				addRenderableWidget(new Slider(col2, y + 3 * ROW, "Position X", 0, 100, 1, () -> slayer.hudX,
+						v -> slayer.hudX = v, v -> String.format(Locale.ROOT, "%.0f%%", v)));
+				addRenderableWidget(new Slider(col2, y + 4 * ROW, "Position Y", 0, 100, 1, () -> slayer.hudY,
+						v -> slayer.hudY = v, v -> String.format(Locale.ROOT, "%.0f%%", v)));
+			}
 			default -> {
 			}
 		}
@@ -180,6 +213,8 @@ public class SettingsScreen extends Screen {
 			case ANIMATIONS -> List.of("§7First-person item position, size and swing.", "§726.3: swing speed can only be faster.");
 			case DUNGEONS -> List.of("§7M7 calculator. Graduate/Explorer: Auto reads the", "§7profile's shards; set a level if it's wrong.",
 					"§7Team share: XP classes you didn't play get.");
+			case SLAYER -> List.of("§7Session: when it starts over (\"After a break\" uses", "§7Break length; days start at \"New day at\").",
+					"§7/slayertracker [sven|rev|tara|eman|blaze|vamp]", "§7/slayertracker mode · /slayertracker reset <mode>");
 			case GARDEN, MINING, FISHING -> List.of("§7No " + category.label.toLowerCase(Locale.ROOT) + " tweaks yet.");
 		};
 	}

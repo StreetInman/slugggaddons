@@ -25,13 +25,14 @@ import io.github.streetinman.skyblockpv.core.api.HypixelClient;
 import io.github.streetinman.skyblockpv.core.api.MojangClient;
 import io.github.streetinman.skyblockpv.core.api.ProfileService;
 import io.github.streetinman.skyblockpv.core.networth.PriceClient;
+import io.github.streetinman.skyblockpv.feature.SlayerTrackerFeature;
 import io.github.streetinman.skyblockpv.gui.PvScreen;
 import io.github.streetinman.skyblockpv.gui.ItemBrowserScreen;
 import io.github.streetinman.skyblockpv.gui.SettingsScreen;
 
 /**
  * SlugggAddons. Registers {@code /pv [player]} (also {@code /spv} and {@code /sbpv}),
- * {@code /slugggaddons} for settings, {@code /sbitems} and {@code /pvdump <player>}.
+ * {@code /slugggaddons} for settings, {@code /sbitems}, {@code /slayertracker} and {@code /pvdump <player>}.
  *
  * <p>Everything here is read-only: the mod calls the public Hypixel API over HTTPS and draws its
  * own screen. It never sends packets to the server or acts on the player's behalf.
@@ -46,6 +47,7 @@ public final class SkyblockPvClient implements ClientModInitializer {
 	private static Path configFile;
 	private static ProfileService profiles;
 	private static PriceClient prices;
+	private static HypixelClient hypixel;
 
 	@Override
 	public void onInitializeClient() {
@@ -55,11 +57,12 @@ public final class SkyblockPvClient implements ClientModInitializer {
 		config = PvConfig.load(configFile);
 
 		HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
-		HypixelClient hypixel = new HypixelClient(http, () -> config.apiBaseUrl, () -> config.apiKey);
+		hypixel = new HypixelClient(http, () -> config.apiBaseUrl, () -> config.apiKey);
 		profiles = new ProfileService(new MojangClient(http), hypixel);
 		prices = new PriceClient(http, hypixel, () -> config.lowestBinUrl);
 
 		if ("1".equals(System.getenv("SKYBLOCKPV_SELFTEST"))) SelfTest.start();
+		SlayerTrackerFeature.register();
 
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 			// Other SkyBlock mods often claim /pv too, so the same command is also on /spv and /sbpv.
@@ -83,6 +86,7 @@ public final class SkyblockPvClient implements ClientModInitializer {
 						.then(ClientCommands.argument("search", StringArgumentType.greedyString())
 								.executes(ctx -> openItems(StringArgumentType.getString(ctx, "search")))));
 			}
+			SlayerTrackerFeature.registerCommands(dispatcher);
 			dispatcher.register(ClientCommands.literal("pvdump")
 					.then(ClientCommands.argument("player", StringArgumentType.word())
 							.executes(SkyblockPvClient::dump)));
@@ -146,6 +150,10 @@ public final class SkyblockPvClient implements ClientModInitializer {
 
 	public static ProfileService profiles() {
 		return profiles;
+	}
+
+	public static HypixelClient hypixel() {
+		return hypixel;
 	}
 
 	public static PriceClient prices() {
