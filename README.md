@@ -51,7 +51,7 @@ from the profile automatically:
 - Derpy as the current mayor
 
 Hover the calculator to see exactly which boosts were found. Boosts the API can't see go in
-`config/skyblock-pv.json`: `dungeonGlobalBoostPercent`, `dungeonExtraClassBoostPercent`, and
+`config/slugggaddons.json`: `dungeonGlobalBoostPercent`, `dungeonExtraClassBoostPercent`, and
 `dungeonTeamShare`. If the shard levels it shows are wrong, set `dungeonGraduateLevel` and
 `dungeonExplorerLevel` (0–10; `-1` means read from the profile).
 
