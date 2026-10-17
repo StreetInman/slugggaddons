@@ -1,2 +1,8 @@
 # <class> <regex>  or  find <regex>
-net.minecraft.client.multiplayer.ClientPacketListener sendCommand|sendChat|sendUnsignedCommand
+find fabric/api/client/rendering/v1/hud/|fabric/api/client/message/v1/
+net.minecraft.world.scores.Scoreboard getDisplayObjective|listPlayerScores|getPlayersTeam|public java.util.Collection
+net.minecraft.world.scores.PlayerTeam getPlayerPrefix|getPlayerSuffix|formatNameForTeam
+net.minecraft.world.scores.PlayerScoreEntry public
+net.minecraft.world.item.component.CustomData copyTag|getUnsafe|public
+net.minecraft.nbt.CompoundTag getStringOr|public java.util.Optional<java.lang.String> getString
+net.minecraft.network.chat.HoverEvent\$ShowText public
