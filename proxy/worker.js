@@ -1,7 +1,8 @@
 // SlugggAddons API proxy (Cloudflare Worker). Holds the Hypixel production key so it never ships
 // inside the mod, and caches responses so many players viewing the same profile cost one request.
 //
-// Deploy: `npx wrangler deploy` from this folder, then `npx wrangler secret put HYPIXEL_KEY`.
+// Deploy: see "Setting up the proxy on Cloudflare" in docs/publishing.md (website steps, no install
+// needed), or run `npx wrangler deploy` here, then `npx wrangler secret put HYPIXEL_KEY`.
 
 const ALLOWED = [/^\/v2\/skyblock\/profiles$/, /^\/v2\/skyblock\/bazaar$/, /^\/v2\/resources\/skyblock\/[a-z_]+$/];
 const CACHE_SECONDS = 300;

@@ -54,7 +54,7 @@ public final class HypixelClient {
 	}
 
 	private CompletableFuture<JsonObject> get(String path, boolean needsKey) {
-		HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(baseUrl.get() + path))
+		HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(baseUrl.get().strip().replaceAll("/+$", "") + path))
 				.timeout(Duration.ofSeconds(15))
 				.header("User-Agent", "slugggaddons")
 				.GET();
