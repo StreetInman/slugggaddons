@@ -144,10 +144,7 @@ public class SettingsScreen extends Screen {
 						v -> config.dungeonGraduateLevel = (int) v, autoOrLevel()));
 				addRenderableWidget(new Slider(col2, y + ROW, "Explorer", -1, 10, 1, () -> config.dungeonExplorerLevel,
 						v -> config.dungeonExplorerLevel = (int) v, autoOrLevel()));
-				addRenderableWidget(toggle(col2, y + 2 * ROW, "Positional msgs", () -> config.positionalMessagesEnabled,
-						() -> config.positionalMessagesEnabled = !config.positionalMessagesEnabled));
-				addRenderableWidget(toggle(col2, y + 3 * ROW, "Auto-send msgs", () -> config.positionalMessagesAutoSend,
-						() -> config.positionalMessagesAutoSend = !config.positionalMessagesAutoSend));
+
 			}
 			default -> {
 			}
@@ -175,14 +172,14 @@ public class SettingsScreen extends Screen {
 	/** Short help under each category's options. */
 	private List<String> notes() {
 		return switch (category) {
-			case GENERAL -> List.of("§7/pv <player> (/spv, /sbpv) · /sbitems · /posmsg",
+			case GENERAL -> List.of("§7/pv <player> (/spv, /sbpv) · /sbitems for items",
 					"§7Every setting is client-side and changes only", "§7what you see. Nothing is sent to the server.");
 			case GUI -> List.of("§7How the /pv window looks.");
 			case PLAYER -> List.of("§7Stretch the drawn model on each axis. Negative", "§7height turns it upside down. Your hitbox and",
 					"§7movement don't change; only you see it.");
 			case ANIMATIONS -> List.of("§7First-person item position, size and swing.", "§726.3: swing speed can only be faster.");
-			case DUNGEONS -> List.of("§7M7 calculator: Auto reads Graduate/Explorer from shards.",
-					"§7Positional messages: /posmsg add <name> <radius> <msg>.", "§7Auto-send off: click the chat line to send instead.");
+			case DUNGEONS -> List.of("§7M7 calculator. Graduate/Explorer: Auto reads the", "§7profile's shards; set a level if it's wrong.",
+					"§7Team share: XP classes you didn't play get.");
 			case GARDEN, MINING, FISHING -> List.of("§7No " + category.label.toLowerCase(Locale.ROOT) + " tweaks yet.");
 		};
 	}

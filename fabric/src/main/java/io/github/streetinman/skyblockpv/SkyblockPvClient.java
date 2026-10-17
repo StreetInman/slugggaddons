@@ -25,14 +25,13 @@ import io.github.streetinman.skyblockpv.core.api.HypixelClient;
 import io.github.streetinman.skyblockpv.core.api.MojangClient;
 import io.github.streetinman.skyblockpv.core.api.ProfileService;
 import io.github.streetinman.skyblockpv.core.networth.PriceClient;
-import io.github.streetinman.skyblockpv.feature.PositionalMessages;
 import io.github.streetinman.skyblockpv.gui.PvScreen;
 import io.github.streetinman.skyblockpv.gui.ItemBrowserScreen;
 import io.github.streetinman.skyblockpv.gui.SettingsScreen;
 
 /**
  * SlugggAddons. Registers {@code /pv [player]} (also {@code /spv} and {@code /sbpv}),
- * {@code /slugggaddons} for settings, {@code /sbitems}, {@code /posmsg} and {@code /pvdump <player>}.
+ * {@code /slugggaddons} for settings, {@code /sbitems} and {@code /pvdump <player>}.
  *
  * <p>Everything here is read-only: the mod calls the public Hypixel API over HTTPS and draws its
  * own screen. It never sends packets to the server or acts on the player's behalf.
@@ -60,7 +59,6 @@ public final class SkyblockPvClient implements ClientModInitializer {
 		profiles = new ProfileService(new MojangClient(http), hypixel);
 		prices = new PriceClient(http, hypixel, () -> config.lowestBinUrl);
 
-		PositionalMessages.register();
 		if ("1".equals(System.getenv("SKYBLOCKPV_SELFTEST"))) SelfTest.start();
 
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
@@ -79,7 +77,6 @@ public final class SkyblockPvClient implements ClientModInitializer {
 					return 1;
 				}).then(ClientCommands.literal("items").executes(ctx -> openItems(""))));
 			}
-			PositionalMessages.registerCommands(dispatcher);
 			for (String name : ITEM_COMMAND_NAMES) {
 				dispatcher.register(ClientCommands.literal(name)
 						.executes(ctx -> openItems(""))

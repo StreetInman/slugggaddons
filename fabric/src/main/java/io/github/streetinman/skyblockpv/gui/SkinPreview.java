@@ -47,7 +47,7 @@ final class SkinPreview {
 		float dx = mouseX - (widget.getX() + widget.getWidth() / 2f);
 		float dy = mouseY - (widget.getY() + widget.getHeight() / 3f);
 		PlayerSkinWidgetAccessor access = (PlayerSkinWidgetAccessor) widget;
-		access.skyblockpv$setRotationY(Math.clamp(-dx * 0.35f, -70f, 70f));
+		access.skyblockpv$setRotationY(Math.clamp(dx * 0.35f, -70f, 70f));
 		access.skyblockpv$setRotationX(Math.clamp(-dy * 0.2f, -30f, 30f));
 	}
 }

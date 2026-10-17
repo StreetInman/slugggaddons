@@ -608,8 +608,37 @@ public class PvScreen extends Screen {
 				pages.add(new StoragePage("Wardrobe page " + n + worn, grid));
 			}
 		}
-		m.loadouts().forEach((name, items) -> pages.add(new StoragePage("Loadout: " + titleCase(name.replace(' ', '_')), items)));
+		pages.addAll(loadoutPages(m.loadouts()));
 		return List.copyOf(pages);
+	}
+
+	/**
+	 * Loadouts laid out like the wardrobe: one column per set, 9 sets a page. The API stores each
+	 * set's pieces as separate item lists under the set (e.g. "slots 1 helmet", "slots 1 chestplate"),
+	 * so lists are grouped by everything but the last part of their path.
+	 */
+	private static List<StoragePage> loadoutPages(Map<String, List<SkyblockItem>> loadouts) {
+		Map<String, List<SkyblockItem>> sets = new java.util.LinkedHashMap<>();
+		loadouts.forEach((path, items) -> {
+			int cut = path.lastIndexOf(' ');
+			String set = cut < 0 ? path : path.substring(0, cut);
+			List<SkyblockItem> pieces = sets.computeIfAbsent(set, k -> new ArrayList<>());
+			for (SkyblockItem item : items) if (item != null) pieces.add(item);
+		});
+		sets.values().removeIf(List::isEmpty);
+		List<List<SkyblockItem>> columns = new ArrayList<>(sets.values());
+		List<StoragePage> pages = new ArrayList<>();
+		for (int from = 0, n = 1; from < columns.size(); from += 9, n++) {
+			List<List<SkyblockItem>> page = columns.subList(from, Math.min(columns.size(), from + 9));
+			int rows = Math.min(6, Math.max(4, page.stream().mapToInt(List::size).max().orElse(4)));
+			List<SkyblockItem> grid = new ArrayList<>(java.util.Collections.nCopies(rows * 9, (SkyblockItem) null));
+			for (int c = 0; c < page.size(); c++) {
+				List<SkyblockItem> pieces = page.get(c);
+				for (int r = 0; r < rows && r < pieces.size(); r++) grid.set(r * 9 + c, pieces.get(r));
+			}
+			pages.add(new StoragePage("Loadouts page " + n + " §7(sets " + (from + 1) + "–" + (from + page.size()) + ")", grid));
+		}
+		return pages;
 	}
 
 	private void drawWardrobe(GuiGraphicsExtractor g, int y, int mouseX, int mouseY) {

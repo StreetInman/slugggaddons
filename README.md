@@ -63,7 +63,7 @@ Everything there is client-side and only changes what you see:
 
 - **GUI**: show or hide the model and summary column in `/pv`, and pick which tab `/pv` opens on.
 - **Dungeons**: the M7 calculator's team share, global XP boost, extra class XP, and Graduate and
-  Explorer levels (Auto reads them from the profile), and positional messages (below).
+  Explorer levels (Auto reads them from the profile).
 
 - **Player size**: stretch your own player model (optionally everyone's) on each axis: width, height
   and depth, from -3x to 3x. A negative height turns the model upside down. Hitboxes and movement are
@@ -72,28 +72,6 @@ Everything there is client-side and only changes what you see:
   skipping the dip when you switch items. On 26.1.2 and 26.2 swing speed can be slower or faster;
   on 26.3, where swing timing is tied into combat, only the drawn animation is sped up, so it can only
   be made faster.
-
-### Positional messages (`/posmsg`)
-
-A replacement for Odin's old positional messages. Save a spot with a radius and a party message;
-when you walk into it, the mod sends `/pc <message>` for you, once per visit and never more than one
-message a second. Turn **Auto-send** off in the Dungeons settings tab to get a clickable chat line
-instead, which puts the message in your chat box for you to send with Enter.
-
-> Sending chat automatically is something many SkyBlock mods do, but Hypixel's rules on it are not
-> clear-cut, so use it at your own risk.
-
-| Command | What it does |
-|---|---|
-| `/posmsg add <name> <radius> <message>` | Saves the block you're standing on |
-| `/posmsg addat <name> <x> <y> <z> <radius> <message>` | Saves exact coordinates |
-| `/posmsg list` | Lists your messages, each with a **[send]** button |
-| `/posmsg send <name>` | Opens chat with that message typed in |
-| `/posmsg remove <name>` | Deletes one |
-| `/posmsg toggle` | Turns the feature on or off |
-
-Messages can include `{x}`, `{y}`, `{z}` (your block position) and `{name}`. `/pm` works as a
-shorter alias. `/posmsg send <name>` sends one straight away.
 
 ### Networth
 
@@ -140,7 +118,6 @@ As with any mod, Hypixel says all mods are used at your own risk.
 | `/pv <player>` | Opens another player's profile |
 | `/spv`, `/sbpv` | Same as `/pv`, for when another mod has taken `/pv` |
 | `/slugggaddons` (or `/skyblockpv`) | Opens the settings |
-| `/posmsg` (or `/pm`) | Positional party messages (above) |
 | `/sbitems [search]` (or `/sbrecipe`, `/skyblockpv items`) | Item browser: every SkyBlock item, a page at a time, with search, recipes and "used in" |
 | `/pvdump <player>` | Saves the raw API response to `config/slugggaddons/dumps/` (for debugging) |
 
