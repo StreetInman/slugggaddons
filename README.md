@@ -102,7 +102,7 @@ As with any mod, Hypixel says all mods are used at your own risk.
 1. Install [Fabric Loader](https://fabricmc.net/use/) and the
    [Fabric API](https://modrinth.com/mod/fabric-api) mod for your Minecraft version.
 2. Download the jar for your Minecraft version from
-   [Releases](https://github.com/StreetInman/skyblock-pv/releases) (for example
+   [Releases](https://github.com/StreetInman/slugggaddons/releases) (for example
    `slugggaddons-0.4.1+26.1.2.jar`) and put it in your `mods` folder. Remove any older
    `skyblock-pv` jar.
 3. Start the game once. The mod creates `config/slugggaddons.json` (copying your old

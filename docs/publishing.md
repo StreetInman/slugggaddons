@@ -54,5 +54,5 @@ Modrinth reviews a new project before it goes public, which usually takes a few 
 
 ## Renaming the GitHub repo (optional)
 
-The mod is called SlugggAddons, but the repo is still `skyblock-pv`. To rename it, open the repo's
+The repo was renamed from `skyblock-pv` to `slugggaddons`. To rename it again, open the repo's
 **Settings → General → Repository name**. GitHub redirects the old URL, so nothing else breaks.

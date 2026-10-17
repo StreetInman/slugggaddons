@@ -6,8 +6,8 @@
   "description": "Client-side Hypixel SkyBlock tweaks: a full profile viewer (/pv), item and recipe browser, player model and item animation tweaks, and positional party messages.",
   "authors": ["StreetInman"],
   "contact": {
-    "sources": "https://github.com/StreetInman/skyblock-pv",
-    "issues": "https://github.com/StreetInman/skyblock-pv/issues"
+    "sources": "https://github.com/StreetInman/slugggaddons",
+    "issues": "https://github.com/StreetInman/slugggaddons/issues"
   },
   "license": "MIT",
   "environment": "client",
